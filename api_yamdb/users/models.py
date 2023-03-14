@@ -7,7 +7,7 @@ class User(AbstractUser):
         'Биография',
         blank=True,
     )
-    role = models.TextField(
+    role = models.TextChoices(
         'Роль',
         default='user',
     )
