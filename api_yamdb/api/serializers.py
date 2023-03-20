@@ -43,8 +43,17 @@ class TitleSerializer(serializers.ModelSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
         model = User
+
+    def validate_username(self, username):
+        if username in 'me':
+            raise serializers.ValidationError(
+                'Использовать имя "me" запрещено'
+            )
+        return username
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -53,12 +62,19 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'username',)
 
+    def validate(self, data):
+        if data.get('username') == 'me':
+            raise serializers.ValidationError(
+                'Использовать имя me запрещено'
+            )
+        return data
+
 
 class TokenUserSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    confirmation_code = serializers.CharField()
+    username = serializers.CharField(max_length=150, required=True)
+    confirmation_code = serializers.CharField(max_length=150, required=True)
 
-    
+
 class TitleCreateSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(), slug_field='slug', many=True
