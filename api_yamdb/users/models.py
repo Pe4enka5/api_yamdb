@@ -3,11 +3,20 @@ from django.db import models
 
 
 class User(AbstractUser):
+    email = models.EmailField(('email address'), unique=True)
     bio = models.TextField(
         'Биография',
         blank=True,
     )
-    role = models.TextChoices(
+
+    class Role(models.TextChoices):
         'Роль',
-        default='user',
+        USER = 'user', ('user'),
+        MODERATOR = 'moderator', ('moderator'),
+        ADMIN = 'admin', ('admin')
+
+    role = models.CharField(
+        max_length=15,
+        choices=Role.choices,
+        default=Role.USER,
     )
