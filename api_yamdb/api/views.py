@@ -1,7 +1,7 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView
 from rest_framework.pagination import (LimitOffsetPagination,
@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from api.filtres import TitleFilter
 from api.mixins import ListGreateDeleteViewSet
-from api.permissions import (AnonimReadOnly, IsOwnerOrReadOnly,
+from api.permissions import (AnonimReadOnly, IsAdminOrReadOnly,
                              IsSuperUserIsAdminIsModeratorIsAuthor,
                              IsSuperUserOrIsAdminOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
@@ -27,7 +27,7 @@ from users.models import User
 class CategoryViewSet(ListGreateDeleteViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, )
+    permission_classes = (IsAdminOrReadOnly, )
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -45,6 +45,7 @@ class CategoryViewSet(ListGreateDeleteViewSet):
 class GenreViewSet(ListGreateDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    pagination_class = PageNumberPagination
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, )
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -63,7 +64,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, )
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          AnonimReadOnly,
+                          IsSuperUserIsAdminIsModeratorIsAuthor)
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
@@ -74,10 +77,9 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
-    ]
+    permission_classes = (
+        IsAdminOrReadOnly,
+    )
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -93,17 +95,16 @@ class ReviewViewSet(viewsets.ModelViewSet):
             id=self.kwargs.get('title_id')
         )
         serializer.save(
-            author=self.request.user,
             title=title,
+            author=self.request.user
         )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [
-        permissions.IsAuthenticatedOrReadOnly,
-        IsOwnerOrReadOnly
-    ]
+    permission_classes = (
+        IsAdminOrReadOnly,
+    )
     pagination_class = PageNumberPagination
 
     def get_queryset(self):

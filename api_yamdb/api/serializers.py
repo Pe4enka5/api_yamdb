@@ -39,6 +39,16 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Title
 
+    def get_rating(self, obj):
+        avg_rating = (
+            Review.objects.filter(title_id=obj.id).
+            aggregate(Avg('rating'))['avg__rating']
+        )
+        if avg_rating is None:
+            return None
+        else:
+            return round(avg_rating, 0)
+
 
 class CustomUserSerializer(serializers.ModelSerializer):
 
@@ -87,16 +97,6 @@ class TitleCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Title
 
-    def get_rating(self, obj):
-        avg_rating = (
-            Review.objects.filter(title_id=obj.id).
-            aggregate(Avg('rating'))['avg__rating']
-        )
-        if avg_rating is None:
-            return None
-        else:
-            return round(avg_rating, 0)
-
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -144,4 +144,3 @@ class CommentSerializer(serializers.ModelSerializer):
             'review'
         )
         model = Comment
-      
