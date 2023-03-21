@@ -6,7 +6,7 @@ User = get_user_model()
 
 
 class Category(models.Model):
-    name = models.TextField(max_length=256)
+    name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(unique=True)
 
     def __str__(self):
@@ -90,7 +90,7 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return self.text[:20]
+        return self.text
 
 
 class Comment(models.Model):
@@ -117,3 +117,6 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ['created']
+
+    def __str__(self):
+        return self.text
