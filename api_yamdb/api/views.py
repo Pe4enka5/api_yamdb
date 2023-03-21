@@ -27,7 +27,7 @@ from users.models import User
 class CategoryViewSet(ListGreateDeleteViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -46,7 +46,7 @@ class GenreViewSet(ListGreateDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     pagination_class = PageNumberPagination
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, )
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
     search_fields = ('name',)
     lookup_field = 'slug'
 
@@ -180,6 +180,17 @@ class RegisterUserViewSet(CreateAPIView):
     def create(self, request):
         serializer = UserRegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        check_user1 = User.objects.filter(email=request.data.get('email'))
+        if check_user1:
+            if request.data.get('email') == check_user1[0].email and request.data.get('username') != check_user1[0].username:
+                return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+
+        check_user2 = User.objects.filter(username=request.data.get('username'))
+        if check_user2:
+            if request.data.get('username') == check_user2[0].username and request.data.get('email') != check_user2[0].email:
+                return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+
         user, created = User.objects.get_or_create(**serializer.validated_data)
         confirmation_code = default_token_generator.make_token(user)
         send_mail(
