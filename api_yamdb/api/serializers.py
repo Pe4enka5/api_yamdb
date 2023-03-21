@@ -1,11 +1,10 @@
+from django.core.validators import RegexValidator
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
-from reviews.models import (Category, Comment,
-                            Genre, Review, Title)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -67,6 +66,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=254)
+    username = serializers.CharField(max_length=150, validators=[RegexValidator(regex=r'^[\w.@+-]+$', message='Имя пользователя содержит недопустимый символ')])
 
     class Meta:
         model = User

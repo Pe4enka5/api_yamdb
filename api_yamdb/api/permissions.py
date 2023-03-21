@@ -9,6 +9,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
                 request.method in permissions.SAFE_METHODS
                 or request.user.role == 'admin'
                 or request.user.is_superuser
+                or request.user.is_staff
             )
         return request.method in permissions.SAFE_METHODS
 
@@ -18,6 +19,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
                 request.method in permissions.SAFE_METHODS
                 or request.user.role == 'admin'
                 or request.user.is_superuser
+                or request.user.is_staff
             )
         return request.method in permissions.SAFE_METHODS
 
