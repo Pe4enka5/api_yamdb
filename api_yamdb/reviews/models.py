@@ -1,8 +1,9 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-User = get_user_model()
+# User = get_user_model()
+from users.models import User
 
 
 class Category(models.Model):
@@ -65,7 +66,7 @@ class Review(models.Model):
         'Дата публикации',
         auto_now_add=True
     )
-    rating = models.PositiveSmallIntegerField(
+    score = models.PositiveSmallIntegerField(
         validators=[
             MinValueValidator(1),
             MaxValueValidator(10)
@@ -102,7 +103,7 @@ class Comment(models.Model):
         verbose_name='Юзер'
     )
     text = models.TextField()
-    created = models.DateTimeField(
+    pub_date = models.DateTimeField(
         'Дата добавления',
         auto_now_add=True,
         db_index=True
@@ -116,7 +117,7 @@ class Comment(models.Model):
     )
 
     class Meta:
-        ordering = ['created']
+        ordering = ['pub_date']
 
     def __str__(self):
         return self.text
