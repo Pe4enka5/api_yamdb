@@ -11,7 +11,7 @@ from users.models import User
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = ('name', 'slug')
         model = Category
         lookup_field = 'slug'
         extra_kwargs = {
@@ -22,7 +22,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = ('name', 'slug')
         model = Genre
         lookup_field = 'slug'
         extra_kwargs = {
@@ -42,7 +42,7 @@ class TitleSerializer(serializers.ModelSerializer):
     def get_rating(self, obj):
         avg_rating = (
             Review.objects.filter(title_id=obj.id).
-            aggregate(Avg('rating'))['rating__avg']
+            aggregate(Avg('score'))['score__avg']
         )
         if avg_rating is None:
             return None
@@ -107,12 +107,13 @@ class TitleCreateSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
-        slug_field='username'
+        slug_field='username',
+        default=serializers.CurrentUserDefault()
     )
     title = serializers.PrimaryKeyRelatedField(
-        read_only=True
+        read_only=True,
+        default=serializers.CurrentUserDefault()
     )
-    default = serializers.CurrentUserDefault()
 
     def validate_score(self, value):
         if not 1 <= value <= 10:
@@ -120,7 +121,7 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Оценкой может быть целым числом, в диапазоне от 1 до 10.'
             )
         return value
-    
+
     def validate(self, data):
         request = self.context['request']
         author = request.user
@@ -134,14 +135,14 @@ class ReviewSerializer(serializers.ModelSerializer):
                 'Можно оставить только один отзыв'
             )
         return data
-    
+
     class Meta:
         fields = (
             'id',
             'author',
             'text',
             'pub_date',
-            'rating',
+            'score',
             'title'
         )
         model = Review
@@ -165,9 +166,10 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
+            'id',
             'author',
             'text',
-            'created',
+            'pub_date',
             'review'
         )
         model = Comment
