@@ -4,17 +4,15 @@ from django.shortcuts import get_object_or_404
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView
-from rest_framework.pagination import (LimitOffsetPagination,
-                                       PageNumberPagination)
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from api.filtres import TitleFilter
 from api.mixins import ListGreateDeleteViewSet
-from api.permissions import (AnonimReadOnly, IsAdminOrReadOnly,
-                             IsSuperUserIsAdminIsModeratorIsAuthor,
-                             IsSuperUserOrIsAdminOnly, IsAdminModeratorOwnerOrReadOnly)
+from api.permissions import (IsAdminOrReadOnly,
+                             IsSuperUserOrIsAdminOnly,
+                             IsAdminModeratorOwnerOrReadOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              CustomUserSerializer, GenreSerializer,
                              ReviewSerializer, TitleCreateSerializer,
@@ -64,7 +62,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,
-                           permissions.IsAuthenticatedOrReadOnly,)
+                          permissions.IsAuthenticatedOrReadOnly,)
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
@@ -176,13 +174,20 @@ class RegisterUserViewSet(CreateAPIView):
 
         check_user1 = User.objects.filter(email=request.data.get('email'))
         if check_user1:
-            if request.data.get('email') == check_user1[0].email and request.data.get('username') != check_user1[0].username:
-                return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+            if (request.data.get('email') == check_user1[0].email
+               and request.data.get('username')
+               != check_user1[0].username):
+                return Response(serializer.data,
+                                status=status.HTTP_400_BAD_REQUEST)
 
-        check_user2 = User.objects.filter(username=request.data.get('username'))
+        check_user2 = User.objects.filter(
+            username=request.data.get('username'))
         if check_user2:
-            if request.data.get('username') == check_user2[0].username and request.data.get('email') != check_user2[0].email:
-                return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+            if (request.data.get('username') == check_user2[0].username
+               and request.data.get('email')
+               != check_user2[0].email):
+                return Response(serializer.data,
+                                status=status.HTTP_400_BAD_REQUEST)
 
         user, created = User.objects.get_or_create(**serializer.validated_data)
         confirmation_code = default_token_generator.make_token(user)
