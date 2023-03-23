@@ -46,6 +46,7 @@ class GenreViewSet(ListGreateDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
 
@@ -55,7 +56,7 @@ class GenreViewSet(ListGreateDeleteViewSet):
         )
 
     def perform_destroy(self, serializer):
-        serializer = get_object_or_404(Category, slug=self.kwargs.get('slug'))
+        serializer = get_object_or_404(Genre, slug=self.kwargs.get('slug'))
         serializer.delete()
 
 
@@ -97,8 +98,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAdminModeratorOwnerOrReadOnly,
-    )
+    permission_classes = (IsAdminModeratorOwnerOrReadOnly,)
 
     def get_queryset(self):
         review = get_object_or_404(
