@@ -10,16 +10,14 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from api.filtres import TitleFilter
 from api.mixins import ListGreateDeleteViewSet
-from api.permissions import (IsAdminOrReadOnly,
-                             IsSuperUserOrIsAdminOnly,
-                             IsAdminModeratorOwnerOrReadOnly)
+from api.permissions import (IsAdminModeratorOwnerOrReadOnly,
+                             IsAdminOrReadOnly, IsSuperUserOrIsAdminOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              CustomUserSerializer, GenreSerializer,
                              ReviewSerializer, TitleCreateSerializer,
                              TitleSerializer, TokenUserSerializer,
                              UserRegisterSerializer)
-from reviews.models import Category, Genre, Review, Title
-from users.models import User
+from reviews.models import Category, Genre, Review, Title, User
 
 
 class CategoryViewSet(ListGreateDeleteViewSet):

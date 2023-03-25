@@ -1,7 +1,62 @@
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
 
-from users.models import User
+from .validators import validate_username
+
+
+class User(AbstractUser):
+    username = models.CharField(
+        max_length=150,
+        verbose_name='Имя пользователя',
+        unique=True,
+        db_index=True,
+        validators=[RegexValidator(regex=r'^[\w.@+-]+\Z', message='Имя пользователя содержит недопустимый символ'), validate_username]
+    )
+    email = models.EmailField(
+        max_length=254,
+        verbose_name='email',
+        unique=True
+    )
+    first_name = models.CharField(
+        max_length=150,
+        verbose_name='Имя',
+        blank=True
+    )
+    last_name = models.CharField(
+        max_length=150,
+        verbose_name='Фамилия',
+        blank=True
+    )
+    bio = models.TextField(
+        'Биография',
+        blank=True,
+    )
+
+    class Role(models.TextChoices):
+        'Роль',
+        USER = 'user', ('user'),
+        MODERATOR = 'moderator', ('moderator'),
+        ADMIN = 'admin', ('admin')
+
+    role = models.CharField(
+        max_length=15,
+        choices=Role.choices,
+        default=Role.USER,
+    )
+
+    @property
+    def is_admin(self):
+        return self.role == self.Role.ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.role == self.Role.MODERATOR
+
+    @property
+    def is_user(self):
+        return self.role == self.Role.USER
 
 
 class Category(models.Model):
@@ -56,7 +111,7 @@ class Review(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='review',
+        related_name='reviews',
         verbose_name='Юзер'
     )
     text = models.TextField(verbose_name='Отзыв')
