@@ -1,12 +1,11 @@
-﻿from django.conf import settings
+﻿import csv
+import os
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.shortcuts import get_object_or_404
-
-import os
-import csv
-from reviews.models import (Category, Comment, Genre,
-                            TitleGenres, Review, Title)
-from users.models import User
+from reviews.models import (Category, Comment, Genre, Review, Title,
+                            TitleGenres, User)
 
 
 def process_file(name: str):

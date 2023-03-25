@@ -1,7 +1,51 @@
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.utils.translation import gettext_lazy as _
 
-from users.models import User
+
+class User(AbstractUser):
+    username = models.CharField(
+        max_length=150,
+        verbose_name='Имя пользователя',
+        unique=True,
+        db_index=True,
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+\z$',
+            message='Имя пользователя содержит недопустимый символ'
+        )]
+    )
+    email = models.EmailField(
+        max_length=254,
+        verbose_name='email',
+        unique=True
+    )
+    first_name = models.CharField(
+        max_length=150,
+        verbose_name='Имя',
+        blank=True
+    )
+    last_name = models.CharField(
+        max_length=150,
+        verbose_name='Фамилия',
+        blank=True
+    )
+    bio = models.TextField(
+        'Биография',
+        blank=True,
+    )
+
+    class Role(models.TextChoices):
+        USER = 'user', ('user'),
+        MODERATOR = 'moderator', ('moderator'),
+        ADMIN = 'admin', ('admin')
+
+    role = models.CharField(
+        max_length=15,
+        choices=Role.choices,
+        default=Role.USER,
+    )
 
 
 class Category(models.Model):
