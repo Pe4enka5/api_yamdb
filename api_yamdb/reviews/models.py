@@ -48,6 +48,18 @@ class User(AbstractUser):
         default=Role.USER,
     )
 
+    @property
+    def is_admin(self):
+        return self.role == self.Role.ADMIN
+
+    @property
+    def is_moderator(self):
+        return self.role == self.Role.MODERATOR
+
+    @property
+    def is_user(self):
+        return self.role == self.Role.USER
+
 
 class Category(models.Model):
     name = models.CharField(max_length=200, unique=True)

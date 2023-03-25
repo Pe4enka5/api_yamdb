@@ -7,7 +7,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         if request.user.is_authenticated:
             return (
                 request.method in permissions.SAFE_METHODS
-                or request.user.role == 'admin'
+                or request.user.is_admin
                 or request.user.is_superuser
                 or request.user.is_staff
             )
@@ -17,7 +17,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         if request.user.is_authenticated:
             return (
                 request.method in permissions.SAFE_METHODS
-                or request.user.role == 'admin'
+                or request.user.is_admin
                 or request.user.is_superuser
                 or request.user.is_staff
             )
@@ -37,7 +37,7 @@ class IsSuperUserOrIsAdminOnly(permissions.BasePermission):
             request.user.is_authenticated
             and (request.user.is_superuser
                  or request.user.is_staff
-                 or request.user.role == 'admin'))
+                 or request.user.is_admin))
 
 
 class IsSuperUserIsAdminIsModeratorIsAuthor(permissions.BasePermission):
@@ -48,8 +48,8 @@ class IsSuperUserIsAdminIsModeratorIsAuthor(permissions.BasePermission):
             or request.user.is_authenticated
             and (request.user.is_superuser
                  or request.user.is_staff
-                 or request.user.role == 'admin'
-                 or request.user.role == 'moderator'
+                 or request.user.is_admin
+                 or request.user.is_moderator
                  or request.user == obj.author))
 
 
@@ -64,6 +64,6 @@ class IsAdminModeratorOwnerOrReadOnly(permissions.BasePermission):
         return (
             request.method in permissions.SAFE_METHODS
             or obj.author == request.user
-            or request.user.role == 'moderator'
-            or request.user.role == 'admin'
+            or request.user.is_moderator
+            or request.user.is_admin
         )
