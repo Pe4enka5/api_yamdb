@@ -12,7 +12,7 @@ class User(AbstractUser):
         unique=True,
         db_index=True,
         validators=[RegexValidator(
-            regex=r'^[\w.@+-]+\z$',
+            regex=r'^[\w.@+-]+$',
             message='Имя пользователя содержит недопустимый символ'
         )]
     )
@@ -37,6 +37,7 @@ class User(AbstractUser):
     )
 
     class Role(models.TextChoices):
+        'Роль',
         USER = 'user', ('user'),
         MODERATOR = 'moderator', ('moderator'),
         ADMIN = 'admin', ('admin')
@@ -100,7 +101,7 @@ class Review(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='review',
+        related_name='reviews',
         verbose_name='Юзер'
     )
     text = models.TextField(verbose_name='Отзыв')
