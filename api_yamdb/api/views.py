@@ -10,55 +10,36 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from api.filtres import TitleFilter
 from api.mixins import ListGreateDeleteViewSet
-from api.permissions import (IsAdminModeratorOwnerOrReadOnly,
-                             IsAdminOrReadOnly, IsSuperUserOrIsAdminOnly)
-from api.serializers import (CategorySerializer, CommentSerializer,
-                             CustomUserSerializer, GenreSerializer,
-                             ReviewSerializer, TitleCreateSerializer,
-                             TitleSerializer, TokenUserSerializer,
-                             UserRegisterSerializer)
+from api.permissions import (
+    IsAdminModeratorOwnerOrReadOnly, IsAdminOrReadOnly, AdminOnly
+)
+from api.serializers import (
+    CategorySerializer, CommentSerializer, CustomUserSerializer,
+    GenreSerializer, ReviewSerializer, TitleCreateSerializer,
+    TitleSerializer, TokenUserSerializer, UserRegisterSerializer
+)
 from reviews.models import Category, Genre, Review, Title, User
 
 
-class CategoryViewSet(ListGreateDeleteViewSet):
+class CategoryGenreViewSet(ListGreateDeleteViewSet):
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    lookup_field = 'slug'
+
+
+class CategoryViewSet(CategoryGenreViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-
-    def perform_create(self, serializer):
-        serializer.save(
-            name=self.request.data['name'], slug=self.request.data['slug']
-        )
-
-    def perform_destroy(self, serializer):
-        serializer = get_object_or_404(Category, slug=self.kwargs.get('slug'))
-        serializer.delete()
 
 
-class GenreViewSet(ListGreateDeleteViewSet):
+class GenreViewSet(CategoryGenreViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-
-    def perform_create(self, serializer):
-        serializer.save(
-            name=self.request.data['name'], slug=self.request.data['slug']
-        )
-
-    def perform_destroy(self, serializer):
-        serializer = get_object_or_404(Genre, slug=self.kwargs.get('slug'))
-        serializer.delete()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
     permission_classes = (IsAdminOrReadOnly,
                           permissions.IsAuthenticatedOrReadOnly,)
     filterset_class = TitleFilter
@@ -117,7 +98,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = (IsAdminOrReadOnly, IsSuperUserOrIsAdminOnly,)
+    permission_classes = (IsAdminOrReadOnly, AdminOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
 
