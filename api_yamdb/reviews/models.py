@@ -3,7 +3,7 @@ from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
 from django.db import models
 
-from .validators import validate_username
+from .validators import max_value_current_year, validate_username
 
 
 class User(AbstractUser):
@@ -12,7 +12,10 @@ class User(AbstractUser):
         verbose_name='Имя пользователя',
         unique=True,
         db_index=True,
-        validators=[RegexValidator(regex=r'^[\w.@+-]+\Z', message='Имя пользователя содержит недопустимый символ'), validate_username]
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+\Z',
+            message='Имя пользователя содержит недопустимый символ'),
+            validate_username]
     )
     email = models.EmailField(
         max_length=254,
@@ -36,9 +39,9 @@ class User(AbstractUser):
 
     class Role(models.TextChoices):
         'Роль',
-        USER = 'user', ('user'),
-        MODERATOR = 'moderator', ('moderator'),
-        ADMIN = 'admin', ('admin')
+        USER = 'user', ('Пользователь'),
+        MODERATOR = 'moderator', ('Модератор'),
+        ADMIN = 'admin', ('Администратор')
 
     role = models.CharField(
         max_length=15,
@@ -60,25 +63,47 @@ class User(AbstractUser):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=200, unique=True)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название категории'
+    )
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name='Slug категории'
+    )
 
     def __str__(self):
         return self.name
 
 
 class Genre(models.Model):
-    name = models.TextField(max_length=256)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название жанра'
+    )
+    slug = models.SlugField(
+        max_length=50,
+        unique=True,
+        verbose_name='Slug жанра'
+    )
 
     def __str__(self):
         return self.name
 
 
 class Title(models.Model):
-    name = models.TextField(max_length=256, verbose_name='Название')
-    year = models.IntegerField(verbose_name='Год')
-    description = models.TextField(verbose_name='Описание')
+    name = models.TextField(
+        max_length=256,
+        verbose_name='Название'
+    )
+    year = models.IntegerField(
+        verbose_name='Год',
+        validators=[max_value_current_year]
+    )
+    description = models.TextField(
+        verbose_name='Описание'
+    )
     genre = models.ManyToManyField(
         Genre,
         through='TitleGenres',
@@ -95,8 +120,8 @@ class Title(models.Model):
     )
     rating = models.FloatField(
         blank=True,
-        null=True,
-        verbose_name='Рейтинг')
+        null=True
+    )
 
     def __str__(self):
         return self.name
