@@ -2,7 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
 from django.db import models
-from django.utils.translation import gettext_lazy as _
+
+from .validators import validate_username
 
 
 class User(AbstractUser):
@@ -11,10 +12,7 @@ class User(AbstractUser):
         verbose_name='Имя пользователя',
         unique=True,
         db_index=True,
-        validators=[RegexValidator(
-            regex=r'^[\w.@+-]+\Z',
-            message='Имя пользователя содержит недопустимый символ'
-        )]
+        validators=[RegexValidator(regex=r'^[\w.@+-]+\Z', message='Имя пользователя содержит недопустимый символ'), validate_username]
     )
     email = models.EmailField(
         max_length=254,
