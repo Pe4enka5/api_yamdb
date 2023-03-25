@@ -12,7 +12,7 @@ class User(AbstractUser):
         unique=True,
         db_index=True,
         validators=[RegexValidator(
-            regex=r'^[\w.@+-]+$',
+            regex=r'^[\w.@+-]+\Z',
             message='Имя пользователя содержит недопустимый символ'
         )]
     )
