@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from api.views import (
     CategoryViewSet, CommentViewSet, CustomUserViewSet, GenreViewSet,
-    RegisterUserViewSet, ReviewViewSet, TitleViewSet, TokenUserViewSet
+    ReviewViewSet, TitleViewSet, get_token, signup
 )
 
 router = DefaultRouter()
@@ -23,10 +23,12 @@ router.register(
     basename='comments'
 )
 
+auth_urls = [
+    path('token/', get_token, name='get_token'),
+    path('signup/', signup, name='register_user'),
+]
+
 urlpatterns = [
     path('v1/', include(router.urls)),
-    path('v1/auth/token/', TokenUserViewSet.as_view(),
-         name='token_obtain_pair'),
-    path('v1/auth/signup/', RegisterUserViewSet.as_view(),
-         name='register_user'),
+    path('v1/auth/', include(auth_urls)),
 ]
