@@ -33,7 +33,10 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(
+        source='reviews__score__avg',
+        read_only=True
+    )
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
 
@@ -45,16 +48,6 @@ class TitleSerializer(serializers.ModelSerializer):
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
         model = Title
-
-    def get_rating(self, obj):
-        avg_rating = (
-            Review.objects.filter(title_id=obj.id).
-            aggregate(Avg('score'))['score__avg']
-        )
-        if avg_rating is None:
-            return None
-        else:
-            return round(avg_rating, 0)
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -110,26 +103,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
-    title = serializers.PrimaryKeyRelatedField(
-        read_only=True,
-        default=serializers.CurrentUserDefault()
-    )
-
-    def validate_score(self, value):
-        if not 1 <= value <= 10:
-            raise serializers.ValidationError(
-                'Оценкой может быть целым числом, в диапазоне от 1 до 10.'
-            )
-        return value
 
     def validate(self, data):
         request = self.context['request']
-        author = request.user
         title_id = self.context.get('view').kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
         if (
             request.method == 'POST'
-            and Review.objects.filter(title=title, author=author).exists()
+            and Review.objects.filter(
+                title=title_id,
+                author=request.user
+            ).exists()
         ):
             raise serializers.ValidationError(
                 'Можно оставить только один отзыв'
@@ -143,25 +126,14 @@ class ReviewSerializer(serializers.ModelSerializer):
             'text',
             'pub_date',
             'score',
-            'title'
         )
         model = Review
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('author', 'title'),
-                message='Вы уже оставляли отзыв на данное произведение'
-            )
-        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
         slug_field='username',
-    )
-    review = serializers.PrimaryKeyRelatedField(
-        read_only=True
     )
 
     class Meta:
@@ -170,6 +142,5 @@ class CommentSerializer(serializers.ModelSerializer):
             'author',
             'text',
             'pub_date',
-            'review'
         )
         model = Comment
