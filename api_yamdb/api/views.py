@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-from rest_framework import filters, permissions, status, viewsets
+from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
@@ -11,7 +11,6 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from api.filtres import TitleFilter
-from api.mixins import ListGreateDeleteViewSet
 from api.permissions import (
     IsAdminIsModeratorIsAuthorOrReadOnly, IsAdminOrReadOnly, IsAdminOnly
 )
@@ -24,7 +23,10 @@ from api_yamdb.settings import DEFAULT_FROM_EMAIL
 from reviews.models import Category, Genre, Review, Title, User
 
 
-class CategoryGenreViewSet(ListGreateDeleteViewSet):
+class CategoryGenreViewSet(mixins.CreateModelMixin,
+                           mixins.ListModelMixin,
+                           mixins.DestroyModelMixin,
+                           viewsets.GenericViewSet):
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)

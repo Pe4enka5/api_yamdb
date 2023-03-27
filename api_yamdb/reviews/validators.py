@@ -1,16 +1,17 @@
 import datetime
 import re
 
-from django.core.validators import MaxValueValidator
 from django.forms import ValidationError
 
 from api_yamdb.settings import NOT_USERNAME
 
 
 def max_value_current_year(value):
-    return MaxValueValidator(
-        datetime.date.today().year, 'Год не может быть больше текущего'
-    )(value)
+    year = datetime.date.today().year
+    if value > year:
+        raise ValidationError(f'Год произведения - "{value}" не может быть '
+                              f'больше текущего года - "{year}"')
+    return value
 
 
 def validate_username(username):

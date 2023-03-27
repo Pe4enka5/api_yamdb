@@ -59,34 +59,30 @@ class User(AbstractUser):
         return self.role == self.Role.USER
 
 
-class Category(models.Model):
+class CategoryGenre(models.Model):
     name = models.CharField(
         max_length=256,
-        verbose_name='Название категории'
+        verbose_name='Название'
     )
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        verbose_name='Slug категории'
+        verbose_name='Slug'
     )
+
+    class Meta:
+        abstract = True
 
     def __str__(self):
         return self.name
 
 
-class Genre(models.Model):
-    name = models.CharField(
-        max_length=256,
-        verbose_name='Название жанра'
-    )
-    slug = models.SlugField(
-        max_length=50,
-        unique=True,
-        verbose_name='Slug жанра'
-    )
+class Category(CategoryGenre):
+    pass
 
-    def __str__(self):
-        return self.name
+
+class Genre(CategoryGenre):
+    pass
 
 
 class Title(models.Model):
