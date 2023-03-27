@@ -118,10 +118,6 @@ class Title(models.Model):
         verbose_name='Категория',
         related_name='category'
     )
-    rating = models.FloatField(
-        blank=True,
-        null=True
-    )
 
     def __str__(self):
         return self.name
@@ -137,19 +133,25 @@ class Review(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name='Юзер'
+        verbose_name='Пользователь'
     )
-    text = models.TextField(verbose_name='Отзыв')
+    text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
         'Дата публикации',
         auto_now_add=True
     )
     score = models.PositiveSmallIntegerField(
         validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10)
+            MinValueValidator(
+                1,
+                message='Оценка ниже 1 невозможна'
+            ),
+            MaxValueValidator(
+                10,
+                message='Оценка выше 10 невозможна'
+            )
         ],
-        verbose_name='Рейтинг'
+        verbose_name='Оценка'
     )
     title = models.ForeignKey(
         Title,
@@ -160,7 +162,7 @@ class Review(models.Model):
     )
 
     class Meta:
-        ordering = ['pub_date']
+        ordering = ['-id',]
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'title'],
@@ -169,7 +171,7 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return self.text
+        return self.text[:25]
 
 
 class Comment(models.Model):
@@ -178,7 +180,7 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         null=True,
         related_name='comments',
-        verbose_name='Юзер'
+        verbose_name='Пользователь'
     )
     text = models.TextField()
     pub_date = models.DateTimeField(
@@ -195,7 +197,7 @@ class Comment(models.Model):
     )
 
     class Meta:
-        ordering = ['pub_date']
+        ordering = ['-id',]
 
     def __str__(self):
-        return self.text
+        return self.text[:25]
