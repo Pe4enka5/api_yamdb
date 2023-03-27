@@ -1,24 +1,21 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (MaxValueValidator, MinValueValidator,
-                                    RegexValidator)
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from api_yamdb.settings import USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH
 from .validators import max_value_current_year, validate_username
 
 
 class User(AbstractUser):
     username = models.CharField(
-        max_length=150,
+        max_length=USERNAME_MAX_LENGTH,
         verbose_name='Имя пользователя',
         unique=True,
         db_index=True,
-        validators=[RegexValidator(
-            regex=r'^[\w.@+-]+\Z',
-            message='Имя пользователя содержит недопустимый символ'),
-            validate_username]
+        validators=(validate_username,)
     )
     email = models.EmailField(
-        max_length=254,
+        max_length=EMAIL_MAX_LENGTH,
         verbose_name='email',
         unique=True
     )
@@ -44,7 +41,7 @@ class User(AbstractUser):
         ADMIN = 'admin', ('Администратор')
 
     role = models.CharField(
-        max_length=15,
+        max_length=len(max(max(Role.choices, key=len))),
         choices=Role.choices,
         default=Role.USER,
     )
