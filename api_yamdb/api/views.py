@@ -42,10 +42,7 @@ class GenreViewSet(CategoryGenreViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-
     queryset = Title.objects.all().annotate(Avg('reviews__score'))
-
-    queryset = Title.objects.all()
     permission_classes = (
         IsAdminOrReadOnly,
         IsAuthenticatedOrReadOnly,

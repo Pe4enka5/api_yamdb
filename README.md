@@ -39,6 +39,10 @@ Simple JWT
 
 ```python manage.py runserver```
 
+- Посмотреть документацию при запущенном сервере (см. выше):
+
+```http://127.0.0.1:8000/redoc/```
+
 ### Автор:
 Печерица Андрей - https://github.com/Pe4enka5,
 Мальшаков Александр - https://github.com/morongod,

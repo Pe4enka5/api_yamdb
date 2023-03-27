@@ -159,7 +159,7 @@ class Review(models.Model):
     )
 
     class Meta:
-        ordering = ['-id',]
+        ordering = ['-id', ]
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'title'],
@@ -194,7 +194,7 @@ class Comment(models.Model):
     )
 
     class Meta:
-        ordering = ['-id',]
+        ordering = ['-id', ]
 
     def __str__(self):
         return self.text[:25]
