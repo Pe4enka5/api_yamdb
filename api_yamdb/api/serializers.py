@@ -134,13 +134,6 @@ class ReviewSerializer(serializers.ModelSerializer):
             'score',
         )
         model = Review
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('author', 'title'),
-                message='Вы уже оставляли отзыв на данное произведение'
-            )
-        ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
