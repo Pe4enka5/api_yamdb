@@ -1,11 +1,11 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
+from api.mixins import UsernameValidate
 from api_yamdb.settings import (
     CONFIRMATION_CODE_MAX_LENGTH, EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
 )
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from reviews.validators import validate_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -48,7 +48,7 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(serializers.ModelSerializer, UsernameValidate):
 
     class Meta:
         fields = (
@@ -56,28 +56,19 @@ class CustomUserSerializer(serializers.ModelSerializer):
         )
         model = User
 
-    def validate_username(self, value):
-        return validate_username(value)
 
-
-class UserRegisterSerializer(serializers.Serializer):
+class UserRegisterSerializer(serializers.Serializer, UsernameValidate):
     email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH)
     username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
 
-    def validate_username(self, value):
-        return validate_username(value)
 
-
-class TokenUserSerializer(serializers.Serializer):
+class TokenUserSerializer(serializers.Serializer, UsernameValidate):
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH, required=True
     )
     confirmation_code = serializers.CharField(
         max_length=CONFIRMATION_CODE_MAX_LENGTH, required=True
     )
-
-    def validate_username(self, value):
-        return validate_username(value)
 
 
 class TitleCreateSerializer(serializers.ModelSerializer):

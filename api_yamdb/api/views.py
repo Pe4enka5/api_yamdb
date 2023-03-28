@@ -14,7 +14,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from api.filtres import TitleFilter
 from api.mixins import ListGreateDeleteViewSet
 from api.permissions import (
-    IsAdminIsModeratorIsAuthorOrReadOnly, IsAdminOrReadOnly, IsAdminOnly
+    IsAdminIsModeratorIsAuthorOrReadOnly, IsAdminOrReadOnly, IsAdminOnly,
 )
 from api.serializers import (
     CategorySerializer, CommentSerializer, CustomUserSerializer,
@@ -124,8 +124,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK
             )
         serializer = CustomUserSerializer(
-            request.user, data=request.data,
-            partial=True, context={'request': request}
+            request.user, data=request.data, partial=True,
         )
         serializer.is_valid(raise_exception=True)
         serializer.save(role=request.user.role)
@@ -143,8 +142,8 @@ def signup(request):
         user, created = User.objects.get_or_create(
             username=username, email=email
         )
-    except IntegrityError:
-        raise ValidationError('Что-то не так, попробуйте позже')
+    except IntegrityError as error:
+        raise ValidationError(f'{error}')
     confirmation_code = default_token_generator.make_token(user)
     send_mail(
         f'confirmation_code для {user.username}',
