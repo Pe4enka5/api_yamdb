@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from api.mixins import UsernameValidate
+from api.mixins import UsernameValidateMixin
 from api_yamdb.settings import (
     CONFIRMATION_CODE_MAX_LENGTH, EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
 )
@@ -45,7 +45,7 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
 
 
-class CustomUserSerializer(serializers.ModelSerializer, UsernameValidate):
+class CustomUserSerializer(serializers.ModelSerializer, UsernameValidateMixin):
 
     class Meta:
         fields = (
@@ -54,12 +54,12 @@ class CustomUserSerializer(serializers.ModelSerializer, UsernameValidate):
         model = User
 
 
-class UserRegisterSerializer(serializers.Serializer, UsernameValidate):
+class UserRegisterSerializer(serializers.Serializer, UsernameValidateMixin):
     email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH)
     username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
 
 
-class TokenUserSerializer(serializers.Serializer, UsernameValidate):
+class TokenUserSerializer(serializers.Serializer, UsernameValidateMixin):
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH, required=True
     )
