@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
 from api.mixins import UsernameValidate
@@ -31,7 +32,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(
-        source='reviews__score__avg',
+        required=False,
         read_only=True
     )
     genre = GenreSerializer(many=True, read_only=True)
@@ -93,18 +94,18 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        request = self.context['request']
-        title_id = self.context.get('view').kwargs.get('title_id')
-        if (
-            request.method == 'POST'
-            and Review.objects.filter(
-                title=title_id,
-                author=request.user
-            ).exists()
-        ):
-            raise serializers.ValidationError(
-                'Можно оставить только один отзыв'
+        if self.context['request'].method == 'POST':
+            title = get_object_or_404(
+                Title,
+                id=self.context['view'].kwargs.get('title_id')
             )
+            if Review.objects.filter(
+                author=self.context['request'].user,
+                title=title
+            ).exists():
+                raise serializers.ValidationError(
+                    'Можно оставить только один отзыв'
+                )
         return data
 
     class Meta:

@@ -3,6 +3,7 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
@@ -42,12 +43,16 @@ class GenreViewSet(CategoryGenreViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(Avg('reviews__score'))
+    queryset = Title.objects.all().annotate(
+        rating=Avg('reviews__score')
+    )
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter,)
+    ordering_fields = ('rating', 'name')
+    ordering = ('-rating', 'name', )
     permission_classes = (
         IsAdminOrReadOnly,
         IsAuthenticatedOrReadOnly,
     )
-
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
@@ -61,10 +66,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminIsModeratorIsAuthorOrReadOnly,)
 
     def get_title(self):
-        title = self.kwargs.get('title_id')
         return get_object_or_404(
             Title,
-            pk=title
+            pk=self.kwargs.get('title_id')
         )
 
     def get_queryset(self):
@@ -82,10 +86,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminIsModeratorIsAuthorOrReadOnly,)
 
     def get_review(self):
-        review = self.kwargs.get('review_id')
         return get_object_or_404(
             Review,
-            pk=review
+            pk=self.kwargs.get('review_id')
         )
 
     def get_queryset(self):

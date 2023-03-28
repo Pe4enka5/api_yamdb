@@ -1,8 +1,6 @@
 # Проект YaMDb
 ### Описание
 Проект YaMDb собирает отзывы пользователей на произведения.
-### Ссылка на документацию
-http://127.0.0.1:8000/redoc/
 ### Технологии
 Python 3.7,
 Django 2.2.19
@@ -33,7 +31,7 @@ Simple JWT
 
 - Заполнить базу данных тестовым контентом:
 
-```python manage.py import csv```
+```python manage.py importcsv```
 
 - Запустить проект:
 
@@ -41,9 +39,9 @@ Simple JWT
 
 - Посмотреть документацию при запущенном сервере (см. выше):
 
-```http://127.0.0.1:8000/redoc/```
+```[Ссылка на документацию](http://127.0.0.1:8000/redoc/)```
 
 ### Автор:
-Печерица Андрей - https://github.com/Pe4enka5,
-Мальшаков Александр - https://github.com/morongod,
-Михайлов Андрей - https://github.com/Andew-063
+- Печерица Андрей - [Github_Pe4enka5](https://github.com/Pe4enka5)
+- Мальшаков Александр - [Github_morongod](https://github.com/morongod)
+- Михайлов Андрей - [Github_Andew-063](https://github.com/Andew-063)
