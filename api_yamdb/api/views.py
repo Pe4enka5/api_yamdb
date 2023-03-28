@@ -3,6 +3,8 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+
 from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
@@ -12,7 +14,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from api.filtres import TitleFilter
 from api.permissions import (
-    IsAdminIsModeratorIsAuthorOrReadOnly, IsAdminOrReadOnly, IsAdminOnly
+    IsAdminIsModeratorIsAuthorOrReadOnly, IsAdminOrReadOnly, IsAdminOnly,
 )
 from api.serializers import (
     CategorySerializer, CommentSerializer, CustomUserSerializer,
@@ -44,7 +46,12 @@ class GenreViewSet(CategoryGenreViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(Avg('reviews__score'))
+    queryset = Title.objects.all().annotate(
+        rating=Avg('reviews__score')
+    )
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter,)
+    ordering_fields = ('rating', 'name')
+    ordering = ('-rating', 'name', )
     permission_classes = (
         IsAdminOrReadOnly,
         IsAuthenticatedOrReadOnly,
@@ -63,10 +70,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminIsModeratorIsAuthorOrReadOnly,)
 
     def get_title(self):
-        title = self.kwargs.get('title_id')
         return get_object_or_404(
             Title,
-            pk=title
+            pk=self.kwargs.get('title_id')
         )
 
     def get_queryset(self):
@@ -84,10 +90,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminIsModeratorIsAuthorOrReadOnly,)
 
     def get_review(self):
-        review = self.kwargs.get('review_id')
         return get_object_or_404(
             Review,
-            pk=review
+            pk=self.kwargs.get('review_id')
         )
 
     def get_queryset(self):
@@ -123,8 +128,7 @@ class CustomUserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_200_OK
             )
         serializer = CustomUserSerializer(
-            request.user, data=request.data,
-            partial=True, context={'request': request}
+            request.user, data=request.data, partial=True,
         )
         serializer.is_valid(raise_exception=True)
         serializer.save(role=request.user.role)
@@ -142,8 +146,8 @@ def signup(request):
         user, created = User.objects.get_or_create(
             username=username, email=email
         )
-    except IntegrityError:
-        raise ValidationError('Что-то не так, попробуйте позже')
+    except IntegrityError as error:
+        raise ValidationError(f'{error}')
     confirmation_code = default_token_generator.make_token(user)
     send_mail(
         f'confirmation_code для {user.username}',
