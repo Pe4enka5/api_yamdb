@@ -34,7 +34,6 @@ Simple JWT
 - Заполнить базу данных тестовым контентом:
 
 ```python manage.py importcsv```
-```python manage.py importcsv```
 
 - Запустить проект:
 
@@ -43,12 +42,8 @@ Simple JWT
 - Посмотреть документацию при запущенном сервере (см. выше):
 
 ```[Ссылка на документацию](http://127.0.0.1:8000/redoc/)```
-```[Ссылка на документацию](http://127.0.0.1:8000/redoc/)```
 
 ### Автор:
-- Печерица Андрей - [Github_Pe4enka5](https://github.com/Pe4enka5)
-- Мальшаков Александр - [Github_morongod](https://github.com/morongod)
-- Михайлов Андрей - [Github_Andew-063](https://github.com/Andew-063)
 - Печерица Андрей - [Github_Pe4enka5](https://github.com/Pe4enka5)
 - Мальшаков Александр - [Github_morongod](https://github.com/morongod)
 - Михайлов Андрей - [Github_Andew-063](https://github.com/Andew-063)
