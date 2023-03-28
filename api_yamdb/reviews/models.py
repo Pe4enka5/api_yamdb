@@ -48,7 +48,11 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == self.Role.ADMIN or self.is_superuser
+        return (
+            self.role == self.Role.ADMIN
+            or self.is_superuser
+            or self.is_staff
+        )
 
     @property
     def is_moderator(self):
@@ -67,7 +71,7 @@ class CategoryGenre(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        verbose_name='Slug'
+        verbose_name='Уникальный человеко-понятный идентификатор'
     )
 
     class Meta:
@@ -78,11 +82,15 @@ class CategoryGenre(models.Model):
 
 
 class Category(CategoryGenre):
-    pass
+
+    class Meta:
+        verbose_name = 'Категория'
 
 
 class Genre(CategoryGenre):
-    pass
+
+    class Meta:
+        verbose_name = 'Жанр'
 
 
 class Title(models.Model):
@@ -121,11 +129,12 @@ class TitleGenres(models.Model):
     genre = models.ForeignKey(Genre, null=True, on_delete=models.SET_NULL)
 
 
-class ReviewAndComment(models.Model):
+class UserAddObject(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        verbose_name='Пользователь'
+        related_name='%(class)ss',
+        verbose_name='Автор'
     )
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
@@ -136,13 +145,15 @@ class ReviewAndComment(models.Model):
 
     class Meta:
         abstract = True
-        ordering = ['-pub_date', ]
+        ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text[:25]
+        return (
+            f'{self.author.username}: {self.text[:25]}'
+        )
 
 
-class Review(ReviewAndComment):
+class Review(UserAddObject):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -164,7 +175,9 @@ class Review(ReviewAndComment):
         verbose_name='Оценка'
     )
 
-    class Meta(ReviewAndComment.Meta):
+    class Meta(UserAddObject.Meta):
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'title'],
@@ -173,7 +186,7 @@ class Review(ReviewAndComment):
         ]
 
 
-class Comment(ReviewAndComment):
+class Comment(UserAddObject):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
@@ -181,3 +194,7 @@ class Comment(ReviewAndComment):
         related_name='comments',
         verbose_name='Отзыв'
     )
+
+    class Meta(UserAddObject.Meta):
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'

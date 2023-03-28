@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from api.mixins import UsernameValidate
+from api.mixins import UsernameValidateMixin
 from api_yamdb.settings import (
     CONFIRMATION_CODE_MAX_LENGTH, EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH
 )
@@ -31,21 +31,19 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.IntegerField(
-        required=False,
-        read_only=True
-    )
-    genre = GenreSerializer(many=True, read_only=True)
-    category = CategorySerializer(read_only=True)
+    rating = serializers.IntegerField()
+    genre = GenreSerializer(many=True)
+    category = CategorySerializer()
 
     class Meta:
         fields = (
             'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
         )
+        read_only_fields = fields
         model = Title
 
 
-class CustomUserSerializer(serializers.ModelSerializer, UsernameValidate):
+class CustomUserSerializer(serializers.ModelSerializer, UsernameValidateMixin):
 
     class Meta:
         fields = (
@@ -54,12 +52,12 @@ class CustomUserSerializer(serializers.ModelSerializer, UsernameValidate):
         model = User
 
 
-class UserRegisterSerializer(serializers.Serializer, UsernameValidate):
+class UserRegisterSerializer(serializers.Serializer, UsernameValidateMixin):
     email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH)
     username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
 
 
-class TokenUserSerializer(serializers.Serializer, UsernameValidate):
+class TokenUserSerializer(serializers.Serializer, UsernameValidateMixin):
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH, required=True
     )
@@ -91,18 +89,18 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     def validate(self, data):
-        if self.context['request'].method == 'POST':
-            title = get_object_or_404(
+        if self.context['request'].method != 'POST':
+            return data
+        if Review.objects.filter(
+            author=self.context['request'].user,
+            title=get_object_or_404(
                 Title,
                 id=self.context['view'].kwargs.get('title_id')
             )
-            if Review.objects.filter(
-                author=self.context['request'].user,
-                title=title
-            ).exists():
-                raise serializers.ValidationError(
-                    'Можно оставить только один отзыв'
-                )
+        ).exists():
+            raise serializers.ValidationError(
+                'Можно оставить только один отзыв'
+            )
         return data
 
     class Meta:
