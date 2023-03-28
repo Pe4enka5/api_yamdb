@@ -48,7 +48,7 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == self.Role.ADMIN
+        return self.role == self.Role.ADMIN or self.is_superuser
 
     @property
     def is_moderator(self):
@@ -121,17 +121,34 @@ class TitleGenres(models.Model):
     genre = models.ForeignKey(Genre, null=True, on_delete=models.SET_NULL)
 
 
-class Review(models.Model):
+class ReviewAndComment(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='reviews',
         verbose_name='Пользователь'
     )
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
         'Дата публикации',
-        auto_now_add=True
+        auto_now_add=True,
+        db_index=True
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ['-pub_date', ]
+
+    def __str__(self):
+        return self.text[:25]
+
+
+class Review(ReviewAndComment):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='reviews',
+        verbose_name='Произведение'
     )
     score = models.PositiveSmallIntegerField(
         validators=[
@@ -146,16 +163,8 @@ class Review(models.Model):
         ],
         verbose_name='Оценка'
     )
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        null=True,
-        related_name='reviews',
-        verbose_name='Произведение'
-    )
 
-    class Meta:
-        ordering = ['-id', ]
+    class Meta(ReviewAndComment.Meta):
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'title'],
@@ -163,24 +172,8 @@ class Review(models.Model):
             )
         ]
 
-    def __str__(self):
-        return self.text[:25]
 
-
-class Comment(models.Model):
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        null=True,
-        related_name='comments',
-        verbose_name='Пользователь'
-    )
-    text = models.TextField()
-    pub_date = models.DateTimeField(
-        'Дата добавления',
-        auto_now_add=True,
-        db_index=True
-    )
+class Comment(ReviewAndComment):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
@@ -188,9 +181,3 @@ class Comment(models.Model):
         related_name='comments',
         verbose_name='Отзыв'
     )
-
-    class Meta:
-        ordering = ['-id', ]
-
-    def __str__(self):
-        return self.text[:25]
