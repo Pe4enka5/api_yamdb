@@ -67,7 +67,7 @@ class CategoryGenre(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        verbose_name='Slug'
+        verbose_name='Уникальный человеко-понятный идентификатор'
     )
 
     class Meta:
@@ -78,11 +78,15 @@ class CategoryGenre(models.Model):
 
 
 class Category(CategoryGenre):
-    pass
+
+    class Meta:
+        verbose_name = 'Категория'
 
 
 class Genre(CategoryGenre):
-    pass
+
+    class Meta:
+        verbose_name = 'Жанр'
 
 
 class Title(models.Model):
