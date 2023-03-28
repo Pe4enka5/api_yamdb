@@ -1,4 +1,6 @@
-﻿from rest_framework import mixins, viewsets
+﻿from rest_framework import mixins, viewsets, serializers
+
+from reviews.validators import validate_username
 
 
 class ListGreateDeleteViewSet(mixins.CreateModelMixin,
@@ -6,3 +8,9 @@ class ListGreateDeleteViewSet(mixins.CreateModelMixin,
                               mixins.DestroyModelMixin,
                               viewsets.GenericViewSet):
     pass
+
+
+class UsernameValidate(serializers.BaseSerializer):
+
+    def validate_username(self, value):
+        return validate_username(value)
