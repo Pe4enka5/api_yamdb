@@ -18,10 +18,10 @@ def validate_username(username):
     if username in NOT_USERNAME:
         raise ValidationError(f'Использовать имя "{username}" запрещено')
 
-    result = re.sub(r'[\w.@+-]+', '', username)
+    result = "".join(set(re.sub(r'[\w.@+-]+', '', username)))
     if result:
         raise ValidationError(
             'Имя пользователя содержит недопустимые символы: '
-            f'{result}'
+            f'{result}.'
         )
     return username
